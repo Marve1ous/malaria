@@ -2,4 +2,5 @@
 /images
 /train
 /test
-/valid
+/vali
+/logs

@@ -6,14 +6,14 @@ from keras.utils import np_utils
 
 ###############################################################################
 # cross-validation at the patient level
-train_data_dir = '../images/train'
-valid_data_dir = '../images/test'
+train_data_dir = './train'
+valid_data_dir = './test'
 ###############################################################################
 # declare the number of samples in each category
 # nb_train_samples = 22045 #  training samples
 # nb_valid_samples = 5513#  validation samples
-nb_train_samples = 960  # training samples
-nb_valid_samples = 200  # validation samples
+nb_train_samples = 616+688  # training samples
+nb_valid_samples = 70+39  # validation samples
 num_classes = 2
 img_rows_orig = 100
 img_cols_orig = 100

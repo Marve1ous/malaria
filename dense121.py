@@ -3,11 +3,11 @@ import tensorflow as tf
 from sklearn.metrics import accuracy_score
 from tensorflow.python.keras import Model
 from tensorflow.python.keras.callbacks import TensorBoard
-from tensorflow.python.keras.layers import Dense
+from tensorflow.python.keras.layers import Dense, GlobalAveragePooling2D
 
 import load_data as load
 
-batch_size = 8
+batch_size = 4
 num_epoch = 10
 tensorboard = TensorBoard(log_dir='./logs/densenet', write_images=True)
 
@@ -24,6 +24,7 @@ test_img[:, :, 2] = (test_img[:, :, 2] - 123.68) * 0.017
 
 base_model = tf.keras.applications.DenseNet121(include_top=False, classes=2)
 x = base_model.output
+x = GlobalAveragePooling2D()(x)
 pre = Dense(2, activation='softmax', name='fc1000')(x)
 model = Model(inputs=base_model.input, outputs=pre)
 for layer in base_model.layers:

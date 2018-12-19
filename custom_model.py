@@ -42,7 +42,7 @@ model.add(Dense(num_classes, activation='softmax'))
 
 model.summary()
 
-
+ckpt = '../ckpt/custom.h5'
 if os.path.exists(ckpt):
     model.load_weights(ckpt, by_name=True)
     print("load done")
@@ -56,6 +56,8 @@ model.compile(optimizer=sgd,
               # loss='categorical_crossentropy',
               loss='binary_crossentropy',
               metrics=['accuracy'])  # 正确率评估
+print(model.summary())
+exit(0)
 ###############################################################################
 # load data
 X_train, Y_train = load_resized_training_data(img_rows, img_cols)
@@ -66,7 +68,6 @@ print(X_train.shape, Y_train.shape)
 t = time.time()
 # 训练
 # iterator = all / batch_size
-ckpt = '../ckpt/custom.h5'
 checkpoint = ModelCheckpoint(filepath=ckpt, save_weights_only=True)
 tensorboard = TensorBoard(log_dir='./logs/custom')
 hist = model.fit(X_train, Y_train, batch_size=batch_size, epochs=num_epoch, verbose=1,
