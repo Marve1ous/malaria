@@ -1,17 +1,13 @@
-#load libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 
-# Plotting the confusion matrix
+
+# 混淆矩阵
 def plot_confusion_matrix(cm, classes,
-                          normalize=False, #if true all values in confusion matrix is between good and infect
+                          normalize=False,  # if true all values in confusion matrix is between good and infect
                           title='Confusion matrix',
                           cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
@@ -34,4 +30,3 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-    
