@@ -1,7 +1,9 @@
 import numpy as np
-from sklearn.metrics import classification_report, roc_curve, auc, log_loss, average_precision_score, confusion_matrix
-from evaluation import plot_confusion_matrix
+from sklearn.metrics import roc_curve, auc, log_loss, average_precision_score, classification_report, confusion_matrix
 from tensorflow.contrib.learn.python.learn.estimators._sklearn import accuracy_score
+
+from evaluation import plot_confusion_matrix
+
 from matplotlib import pyplot as plt
 import load
 
@@ -24,6 +26,7 @@ def choose_model(name):
         return get_custom_model(param['classes'])
     elif name == names[1]:
         from dense121 import get_densenet121_model
+        param['batch_size'] = 4
         return get_densenet121_model(param['classes'])
     elif name == names[2]:
         from mobile import get_mobilev2_model
@@ -33,14 +36,17 @@ def choose_model(name):
 
 
 def train(name):
-    model, checkpoint, tensorboard, preprocess_input = choose_model(name)
+    model, checkpoint, tensorboard, pre_input, decode = choose_model(name)
 
-    train_generator, validation_generator, test_generator, test_label = load.data(param['train'], param['validate'],
-                                                                                  param['test'], param['image_size'],
-                                                                                  param['batch_size'], preprocess_input)
+    train_generator, validation_generator = load.data(train_path=param['train'],
+                                                      vali_path=param['validate'],
+                                                      size=param['image_size'],
+                                                      batch_size=param['batch_size'],
+                                                      preprocess_input=pre_input)
+
     hist = model.fit_generator(
-        train_generator,
-        steps_per_epoch=100,
+        generator=train_generator,
+        steps_per_epoch=10,
         epochs=param['num_epoch'],
         validation_data=validation_generator,
         validation_steps=10,
@@ -51,22 +57,31 @@ def train(name):
     return hist
 
 
-def test(name):
-    model, checkpoint, tensorboard, preprocess_input = choose_model(name)
+def test(name, show_image=False):
+    model, checkpoint, tensorboard, preprocess_input, decode = choose_model(name)
 
-    train_generator, validation_generator, test_generator, test_label = load.data(param['train'], param['validate'],
-                                                                                  param['test'], param['image_size'],
-                                                                                  param['batch_size'], preprocess_input)
+    x_image, x_label = load.load_data(path=param['test'],
+                                      pre_input=preprocess_input,
+                                      image_size=param['image_size'])
 
-    pred = model.predict_generator(
-        generator=test_generator,
-        steps=8
+    pred = model.predict(
+        x=x_image,
+        batch_size=param['batch_size'],
+        verbose=1
     )
 
-    return test_label, pred
+    if show_image:
+        for i in range(256):
+            title = 'Predict class:' + str(np.argmax(pred[i]))
+            plt.title(title)
+            img = decode(x_image[i])
+            plt.imshow(img)
+            plt.show()
+
+    return pred, x_label
 
 
-def evaluate(hist, truth, pred):
+def evaluate(hist, pred, truth):
     # compute the ROC-AUC values
     fpr = dict()
     tpr = dict()
@@ -102,8 +117,8 @@ def evaluate(hist, truth, pred):
     print(prec_score)
 
     # compute the accuracy on validation data
-    Test_accuracy = accuracy_score(truth.argmax(axis=-1), pred.argmax(axis=-1))
-    print("Test_Accuracy = ", Test_accuracy)
+    test_accuracy = accuracy_score(truth.argmax(axis=-1), pred.argmax(axis=-1))
+    print("Test_Accuracy = ", test_accuracy)
 
     # declare target names
     target_names = ['class 0(abnormal)', 'class 1(normal)']  # it should be normal and abnormal for linux machines
@@ -127,10 +142,10 @@ def evaluate(hist, truth, pred):
 
     plt.show()
     # transfer it back
-    y_pred = np.argmax(pred, axis=1)
-    Y_valid = np.argmax(truth, axis=1)
-    print(y_pred)
-    print(Y_valid)
+    pred = np.argmax(pred, axis=1)
+    truth = np.argmax(truth, axis=1)
+    print(pred)
+    print(truth)
 
     # visualizing losses and accuracy
     train_loss = hist.history['loss']
@@ -162,5 +177,7 @@ def evaluate(hist, truth, pred):
 
 
 if __name__ == '__main__':
-    name = names[1]
-    hist = train(name)
+    n = names[2]
+    h = train(n)
+    p, t = test(n)
+    evaluate(h, p, t)

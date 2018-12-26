@@ -10,10 +10,15 @@ from tensorflow.python.keras.utils import plot_model
 
 
 def get_mobilev2_model(classes=2):
-    def preprocess_input(image):
-        image /= 128.
-        image -= 1.
-        return image.astype(np.float32)
+    def preprocess_input(img):
+        img = img / 128.
+        img = img - 1.
+        return img.astype(np.float32)
+
+    def decode_img(img):
+        img = img + 1.
+        img = img * 128.
+        return img.astype(np.uint8)
 
     base_model = MobileNetV2(include_top=False, input_shape=(224, 224, 3))
     x = base_model.output
@@ -41,4 +46,4 @@ def get_mobilev2_model(classes=2):
     model.compile(optimizer=sgd,
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
-    return model, checkpoint, tensorboard, preprocess_input
+    return model, checkpoint, tensorboard, preprocess_input, decode_img

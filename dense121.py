@@ -9,11 +9,17 @@ from tensorflow.python.keras.utils import plot_model
 
 
 def get_densenet121_model(classes=2):
-    def preprocess_input(image):
-        image[:, :, 0] = (image[:, :, 0] - 103.94) * 0.017
-        image[:, :, 1] = (image[:, :, 1] - 116.78) * 0.017
-        image[:, :, 2] = (image[:, :, 2] - 123.68) * 0.017
-        return image.astype(np.float32)
+    def preprocess_input(img):
+        img[:, :, 0] = (img[:, :, 0] - 103.94) * 0.017
+        img[:, :, 1] = (img[:, :, 1] - 116.78) * 0.017
+        img[:, :, 2] = (img[:, :, 2] - 123.68) * 0.017
+        return img.astype(np.float32)
+
+    def decode_img(img):
+        img[:, :, 0] = (img[:, :, 0] / 0.017) + 103.94
+        img[:, :, 1] = (img[:, :, 1] / 0.017) + 116.78
+        img[:, :, 2] = (img[:, :, 2] / 0.017) + 123.68
+        return img.astype(np.uint8)
 
     base_model = tf.keras.applications.DenseNet121(include_top=False, classes=2)
     x = base_model.output
@@ -38,4 +44,4 @@ def get_densenet121_model(classes=2):
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
 
-    return model, checkpoint, tensorboard, preprocess_input
+    return model, checkpoint, tensorboard, preprocess_input, decode_img
