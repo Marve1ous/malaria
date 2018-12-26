@@ -9,9 +9,13 @@ from tensorflow.python.keras.utils import plot_model
 
 
 def get_custom_model(classes=2):
-    def preprocess_input(image):
-        image /= 255.
-        return image.astype(np.float32)
+    def preprocess_input(img):
+        img = img / 255.
+        return img.astype(np.float32)
+
+    def decode_img(img):
+        img = img * 255.
+        return img.astype(np.uint8)
 
     model = Sequential()
     model.add(Conv2D(32, (3, 3), input_shape=(224, 224, 3)))
@@ -46,4 +50,4 @@ def get_custom_model(classes=2):
     model.compile(optimizer=sgd,
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
-    return model, checkpoint, tensorboard, preprocess_input
+    return model, checkpoint, tensorboard, preprocess_input, decode_img
